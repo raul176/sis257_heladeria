@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { SaboresService } from './sabores.service';
 import { CreateSaborDto } from './dto/create-sabor.dto';
 import { UpdateSaborDto } from './dto/update-sabor.dto';
