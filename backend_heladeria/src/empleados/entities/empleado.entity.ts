@@ -1,11 +1,13 @@
-import { Pedido } from 'src/pedidos/entities/pedido.entity';
-import { Venta } from 'src/ventas/entities/venta.entity';
+import { Usuario } from 'src/usuarios/entities/usuario.entity';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('empleados')
@@ -20,20 +22,23 @@ export class Empleado {
   apellido: string;
 
   @Column({ type: 'varchar', length: 30 })
-  cargo: string;
-
-  @Column({ type: 'varchar', length: 30 })
   telefono: string;
 
   @Column({ type: 'varchar', length: 100 })
   direccion: string;
 
-  @CreateDateColumn({ name: 'fecha_contratacion' })
+  @Column({ type: 'varchar', length: 30 })
+  cargo: string;
+
+  @CreateDateColumn({ name: 'fecha_creacion' })
+  fechaCreacion: Date;
+
+  @UpdateDateColumn({ name: 'fecha_modificacion' })
+  fechaModificacion: Date;
+
+  @DeleteDateColumn({ name: 'fecha_eliminacion' })
+  fechaEliminacion: Date;
+
+  @CreateDateColumn({ name: 'fecha_contratación' })
   fechaContratacion: Date;
-
-  @ManyToOne(() => Venta, (venta) => venta.empleado)
-  venta: Venta;
-
-  @ManyToOne(() => Pedido, (pedido) => pedido.empleado)
-  pedido: Pedido;
 }
