@@ -1,43 +1,69 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { Type } from "class-transformer";
-import { IsDefined, IsInt, IsNotEmpty, IsNumber, IsString, MaxLength, Min } from "class-validator";
-import { Cliente } from "src/clientes/entities/cliente.entity";
-import { Usuario } from "src/usuarios/entities/usuario.entity";
+import { IsNotEmpty, IsNumber, IsString, IsArray, ValidateNested, IsOptional, Min, Max, IsEnum } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+
+class DetalleVentaDto {
+  @ApiProperty({ description: 'ID del producto', example: 1 })
+  @IsNotEmpty({ message: 'El ID del producto es requerido' })
+  @IsNumber({}, { message: 'El ID del producto debe ser un número' })
+  idProducto: number;
+
+  @ApiProperty({ description: 'Cantidad del producto', example: 2 })
+  @IsNumber({ allowInfinity: false, allowNaN: false }, { message: 'La cantidad debe ser un número entero válido' })
+  @Min(1, { message: 'La cantidad debe ser al menos 1' })
+  @Max(1000000, { message: 'Cantidad demasiado grande' })
+  cantidad: number;
+}
 
 export class CreateVentaDto {
-  @ApiProperty()
-  @Type(() => Number)
-  @IsDefined({ message: 'El campo idUsuario debe estar definido' })
-  @IsInt({ message: 'El campo idUsuario debe ser de tipo numérico' })
-  readonly idUsuario: Usuario['id'];
-  
-  @ApiProperty()
-  @Type(() => Number)
-  @IsDefined({ message: 'El campo idUsuario debe estar definido' })
-  @IsInt({ message: 'El campo idUuario debe ser de tipo numérico' })
-  readonly idCliente: Cliente['id'];
-  
-  @ApiProperty()
-  @IsNotEmpty({ message: 'El campo tipo pago no debe ser vacío' })
-  @IsString({ message: 'El campo tipo pago debe ser de tipo cadena' })
-  @MaxLength(50, { message: 'El campo tipo pago no debe ser mayor a 50 caracteres' })
-  tipoPago: string;
+  @ApiProperty({ description: 'ID del cliente asociado a la venta', example: 1, nullable: true })
+  @IsNumber({}, { message: 'El ID del cliente debe ser un número' })
+  @IsOptional()
+  idCliente?: number;
 
-  @ApiProperty()
-  @IsNotEmpty({ message: 'El campo monto total no debe ser vacío' })
-  @IsNumber({}, { message: 'El campo monto total debe ser de tipo numérico' })
-  @Min(0, { message: 'El campo monto total debe ser mayor o igual a 0' })
-  montoTotal: number;
+  @ApiProperty({ description: 'ID del usuario que realiza la venta', example: 1 })
+  @IsNumber({}, { message: 'El ID del usuario debe ser un número' })
+  @IsNotEmpty({ message: 'El ID del usuario es requerido' })
+  idUsuario: number;
 
-  @ApiProperty()
-  @IsNotEmpty({ message: 'El campo monto pagado no debe ser vacío' })
-  @IsNumber({}, { message: 'El campo monto pagado debe ser de tipo numérico' })
-  @Min(0, { message: 'El campo monto pagado debe ser mayor o igual a 0' })
+  @ApiProperty({
+    description: 'Método de pago utilizado',
+    example: 'efectivo',
+    enum: ['efectivo', 'tarjeta', 'transferencia', 'cotización', 'otro'],
+    default: 'efectivo',
+  })
+  @IsString({ message: 'El método de pago debe ser una cadena de texto' })
+  @IsEnum(['efectivo', 'tarjeta', 'transferencia', 'cotización', 'otro'], { 
+    message: 'Método de pago inválido. Debe ser: efectivo, tarjeta, transferencia, cotización o otro' 
+  })
+  metodoPago: string;
+
+  @ApiProperty({
+    description: 'Detalles de los productos vendidos',
+    type: [DetalleVentaDto],
+  })
+  @IsArray({ message: 'Los detalles deben ser un arreglo' })
+  @ValidateNested({ each: true })
+  @Type(() => DetalleVentaDto)
+  detalles: DetalleVentaDto[];
+
+  @ApiProperty({
+    description: 'Monto pagado por el cliente',
+    example: 100.00,
+    type: Number,
+    default: 0,
+  })
+  @IsNumber({}, { message: 'El monto pagado debe ser un número' })
+  @Min(0, { message: 'El monto pagado no puede ser negativo' })
   montoPagado: number;
 
-  @ApiProperty()
-  @IsNotEmpty({ message: 'El campo cambio no debe ser vacío' })
-  @IsNumber({}, { message: 'El campo cambio debe ser de tipo numérico' })
-  @Min(0, { message: 'El campo cambio debe ser mayor o igual a 0' })
+  @ApiProperty({
+    description: 'Cambio entregado al cliente',
+    example: 5.00,
+    type: Number,
+    default: 0,
+  })
+  @IsNumber({}, { message: 'El cambio debe ser un número' })
+  @Min(0, { message: 'El cambio no puede ser negativo' })
   cambio: number;
 }

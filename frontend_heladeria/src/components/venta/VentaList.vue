@@ -1,32 +1,70 @@
 <script setup lang="ts">
-import type { Venta } from '@/models/venta'
-import http from '@/plugins/axios'
-import { Column, DataTable, Dialog, InputGroup, InputGroupAddon, InputText } from 'primevue'
+import { onMounted, ref, computed, watch } from 'vue'
+import http from '../../plugins/axios'
 import Button from 'primevue/button'
-import { computed, onMounted, ref } from 'vue'
+import Dialog from 'primevue/dialog'
+import Tag from 'primevue/tag'
+import { useToast } from 'primevue/usetoast'
+import type { Venta } from '../../models/venta'
+import VentaDetallesList from './VentaDetallesList.vue'
 
+const toast = useToast()
 const ENDPOINT = 'ventas'
-const ventas = ref<Venta[]>([])
-const emit = defineEmits(['edit'])
+let ventas = ref<Venta[]>([])
+
+const emit = defineEmits(['show', 'edit'])
 const ventaDelete = ref<Venta | null>(null)
 const mostrarConfirmDialog = ref<boolean>(false)
-const busqueda = ref<string>('')
 
-async function obtenerLista() {
-  ventas.value = await http.get(ENDPOINT).then((response) => response.data)
-}
+// Para el modal de detalles
+const mostrarDetallesDialog = ref<boolean>(false)
+const ventaIdSeleccionada = ref<number | null>(null)
 
-const ventasFiltrados = computed(() => {
-  return ventas.value.filter(
-    (venta) =>
-      venta.tipoPago.toLowerCase().includes(busqueda.value.toLowerCase()) ||
-      venta.usuario.usuario.toLowerCase().includes(busqueda.value.toLowerCase()) ||
-      venta.cliente.nombre.toLowerCase().includes(busqueda.value.toLowerCase()),
-  )
+// Paginación
+const opcionesFilas = [
+  { label: '5', value: 5 },
+  { label: '10', value: 10 },
+  { label: '20', value: 20 },
+  { label: '50', value: 50 }
+]
+const filasPorPagina = ref(5)
+const paginaActual = ref(1)
+const totalPaginas = computed(() => Math.ceil(ventas.value.length / filasPorPagina.value))
+
+const ventasPaginadas = computed(() => {
+  const inicio = (paginaActual.value - 1) * filasPorPagina.value
+  return ventas.value.slice(inicio, inicio + filasPorPagina.value)
 })
 
-function emitirEdicion(venta: Venta) {
-  emit('edit', venta)
+function cambiarPagina(nuevaPagina: number) {
+  if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas.value) {
+    paginaActual.value = nuevaPagina
+  }
+}
+
+watch(filasPorPagina, () => {
+  paginaActual.value = 1
+})
+
+async function obtenerLista() {
+  try {
+    const response = await http.get(ENDPOINT)
+    ventas.value = response.data
+    paginaActual.value = 1
+    console.log('Ventas obtenidas:', ventas.value)
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'No se pudo obtener la lista de ventas',
+      life: 3000
+    })
+  }
+}
+
+function mostrarDetalles(venta: Venta) {
+  ventaIdSeleccionada.value = venta.id
+  mostrarDetallesDialog.value = true
 }
 
 function mostrarEliminarConfirm(venta: Venta) {
@@ -35,123 +73,248 @@ function mostrarEliminarConfirm(venta: Venta) {
 }
 
 async function eliminar() {
-  await http.delete(`${ENDPOINT}/${ventaDelete.value?.id}`)
-  obtenerLista()
-  mostrarConfirmDialog.value = false
+  try {
+    await http.delete(`${ENDPOINT}/${ventaDelete.value?.id}`)
+    toast.add({
+      severity: 'success',
+      summary: 'Éxito',
+      detail: 'Venta anulada correctamente',
+      life: 3000
+    })
+    obtenerLista()
+  } catch (error: any) {
+    let detail = 'No se pudo anular la venta'
+    if (error.response && error.response.status === 400 && error.response.data?.message) {
+      detail = error.response.data.message
+    }
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail,
+      life: 3000
+    })
+  } finally {
+    mostrarConfirmDialog.value = false
+  }
 }
 
 onMounted(() => {
   obtenerLista()
 })
+
 defineExpose({ obtenerLista })
 </script>
 
 <template>
-  <div>
-    <div class="col-7 pl-0 mt-2">
-      <InputGroup>
-        <InputGroupAddon><i class="pi pi-search"></i></InputGroupAddon>
-        <InputText v-model="busqueda" type="text" placeholder="Buscar por tipo pago" />
-      </InputGroup>
+  <div class="venta-container">
+    <div class="table-responsive">
+      <table class="venta-table">
+        <thead>
+          <tr>
+            <th class="th-number">No.</th>
+            <th>Cliente</th>
+            <th>Usuario</th>
+            <th>Método Pago</th>
+            <th>Total Venta</th>
+            <th>Fecha de Venta</th>
+            <th>Estado</th>
+            <th class="th-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(venta, index) in ventasPaginadas" :key="venta.id">
+            <td class="td-number">{{ (paginaActual - 1) * filasPorPagina + index + 1 }}</td>
+            <td>
+              {{
+                (venta.cliente
+                  ? (venta.cliente.nombre + ' ' + (venta.cliente.apellido ?? ''))
+                  : '-')
+              }}
+            </td>
+            <td>
+              {{
+                (venta.usuario
+                  ? (venta.usuario.usuario)
+                  : '-')
+              }}
+            </td>
+            <td>{{ venta.metodoPago }}</td>
+            <td>
+                <span v-if="venta.estado === 'anulada' || venta.totalVenta === 0" class="text-danger">anulada</span>
+                <span v-else>{{ venta.totalVenta }} Bs</span>
+            </td>
+            <td>
+              {{
+                venta.fechaCreacion
+                  ? new Date(venta.fechaCreacion).toLocaleString()
+                  : '-'
+              }}
+            </td>
+            <td>
+              <span v-if="venta.estado === 'realizada'">realizada</span>
+              <span v-else-if="venta.estado === 'anulada'" class="text-danger">anulada</span>
+              <span v-else>{{ venta.estado ?? '-' }}</span>
+            </td>
+            <td class="actions-column">
+              <div class="actions-wrapper">
+                <Button icon="pi pi-eye" aria-label="Ver detalles"
+                  class="p-button-rounded p-button-text p-button-primary" @click="mostrarDetalles(venta)" />
+                <Button icon="pi pi-trash" aria-label="Eliminar" class="p-button-rounded p-button-text p-button-danger"
+                  @click="mostrarEliminarConfirm(venta)" />
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <div>
-      <DataTable
-        :value="ventasFiltrados"
-        paginator
-        scrollable
-        scrollHeight="flex"
-        :rows="5"
-        :rowsPerPageOptions="[5, 10, 20, 50]"
-        tableStyle="min-width: 50rem"
-        paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-        currentPageReportTemplate="{first} a {last} de {totalRecords}"
-      >
-        <Column
-          field="usuario.usuario"
-          header="Usuario"
-          sortable
-          style="min-width: 100px"
-        ></Column>
-        <!-- <Column
-          field="cliente.nombre"
-          header="Cliente"
-          sortable
-          style="min-width: 100px"
-        ></Column> -->
-        <Column field="tipoPago" header="Tipo Pago" sortable style="min-width: 100px"></Column>
-        <Column field="montoTotal" header="Monto Total" style="min-width: 100px"></Column>
-        <Column field="montoPagado" header="Monto Pagado" style="min-width: 100px"></Column>
-        <Column field="cambio" header="Cambio" style="min-width: 100px"></Column>
-        <Column header="Acciones" frozen alignFrozen="right" style="min-width: 120px">
-          <template #body="{ data }">
-            <Button icon="pi pi-pencil" aria-label="Editar" text @click="emitirEdicion(data)" />
-            <Button
-              icon="pi pi-trash"
-              aria-label="Eliminar"
-              severity="danger"
-              text
-              @click="mostrarEliminarConfirm(data)"
-            />
-          </template>
-        </Column>
-      </DataTable>
-    </div>
-    <table v-if="false">
-      <thead>
-        <tr>
-          <th>Nro.</th>
-          <th>Usuario</th>
-          <!-- <th>Cliente</th> -->
-          <th>Tipo Pago</th>
-          <th>Monto Total</th>
-          <th>Monto Pagado</th>
-          <th>Cambio</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(venta, index) in ventasFiltrados" :key="venta.id">
-          <td>{{ index + 1 }}</td>
-          <td>{{ venta.usuario.usuario }}</td>
-          <!-- <td>{{ venta.cliente.nombre }}</td> -->
-          <td>{{ venta.tipoPago }}</td>
-          <td>{{ venta.montoTotal }}</td>
-          <td>{{ venta.montoPagado }}</td>
-          <td>{{ venta.cambio }}</td>
-          <td>
-            <Button icon="pi pi-pencil" aria-label="Editar" text @click="emitirEdicion(venta)" />
-            <Button
-              icon="pi pi-trash"
-              aria-label="Eliminar"
-              severity="danger"
-              text
-              @click="mostrarEliminarConfirm(venta)"
-            />
-          </td>
-        </tr>
-        <tr v-if="ventasFiltrados.length === 0">
-          <td colspan="4">No se encontraron resultados.</td>
-        </tr>
-      </tbody>
-    </table>
 
-    <Dialog
-      v-model:visible="mostrarConfirmDialog"
-      header="Confirmar Eliminación"
-      :style="{ width: '25rem' }"
-    >
-      <p>¿Estás seguro de que deseas eliminar este registro?</p>
-      <div class="flex justify-end gap-2">
-        <Button
-          type="button"
-          label="Cancelar"
-          severity="secondary"
-          @click="mostrarConfirmDialog = false"
-        />
-        <Button type="button" label="Eliminar" @click="eliminar" />
+    <!-- Controles de paginación -->
+    <div class="paginacion-moderna">
+      <div class="controles-paginas">
+        <Button icon="pi pi-angle-left" class="paginacion-btn" @click="cambiarPagina(paginaActual - 1)"
+          :disabled="paginaActual === 1" />
+        <span class="paginacion-info">Página {{ paginaActual }} de {{ totalPaginas }}</span>
+        <Button icon="pi pi-angle-right" class="paginacion-btn" @click="cambiarPagina(paginaActual + 1)"
+          :disabled="paginaActual === totalPaginas || totalPaginas === 0" />
       </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar -->
+    <Dialog v-model:visible="mostrarConfirmDialog" header="Confirmar Anulación" :style="{ width: '25rem' }"
+      :modal="true">
+      <div class="confirmation-content">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--yellow-500)" />
+        <span>
+          ¿Estás seguro de anular la venta ?
+        </span>
+      </div>
+      <template #footer>
+        <Button label="Cancelar" icon="pi pi-times" class="p-button-text" @click="mostrarConfirmDialog = false" />
+        <Button label="Eliminar" icon="pi pi-check" class="p-button-danger" @click="eliminar" />
+      </template>
     </Dialog>
+
+    <!-- Modal de detalles de venta -->
+    <VentaDetallesList :visible="mostrarDetallesDialog" :ventaId="ventaIdSeleccionada"
+      @close="mostrarDetallesDialog = false" @update:visible="(val) => mostrarDetallesDialog = val" />
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.venta-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #ffd6e1;
+  /* Fondo rosado claro */
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: -20px;
+}
+
+.table-responsive {
+  width: 100%;
+  max-width: 800px;
+  overflow-x: auto;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.venta-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.venta-table th {
+  background-color: #ffb3c1;
+  /* Color rosado claro */
+  color: #fff;
+  padding: 10px;
+}
+
+.venta-table td {
+  padding: 10px;
+  border: 1px solid #ffd6e1;
+  /* Bordes rosados */
+}
+
+.venta-table tr:nth-child(even) {
+  background-color: #ffe5ec;
+  /* Fondo rosado claro */
+}
+
+.venta-table tr:hover {
+  background-color: #ffc2d1;
+  /* Fondo rosado más oscuro */
+}
+
+.paginacion-moderna {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin: 1.5rem 0 1rem 0;
+  background: #ffe5ec;
+  /* Fondo rosado claro */
+  border-radius: 2rem;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.07);
+}
+
+.dropdown-filas {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  color: #d81b60;
+  /* Texto frambuesa oscuro */
+  font-weight: 500;
+}
+
+.dropdown-estilizado {
+  min-width: 80px;
+  border-radius: 1rem;
+  border: 1px solid #ffd6e1;
+  background: #fff;
+  font-size: 1rem;
+}
+
+.controles-paginas {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.paginacion-btn {
+  border-radius: 50%;
+  background: #ff80ab;
+  /* Botones rosados */
+  color: #fff;
+  border: none;
+  transition: background-color 0.3s ease;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paginacion-btn:enabled:hover {
+  background: #d81b60;
+  /* Botones rosados más oscuros */
+}
+
+.paginacion-info {
+  font-size: 1rem;
+  color: #d81b60;
+  /* Texto frambuesa oscuro */
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+</style>

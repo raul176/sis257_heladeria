@@ -1,7 +1,7 @@
 import { Sabor } from 'src/sabores/entities/sabor.entity';
 import { Proveedor } from 'src/proveedores/entities/proveedor.entity';
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { Ventadetalle } from 'src/ventadetalles/entities/ventadetalle.entity';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { DetalleVenta } from 'src/ventas/entities/detalle_venta.entity';
 
 @Entity('productos')
 export class Producto {
@@ -20,8 +20,11 @@ export class Producto {
   @Column({ type: 'varchar', length: 100 })
   presentacion: string;
 
-  @Column('decimal')
+  @Column('decimal', { precision: 10, scale: 2 })
   precio: number;
+
+  @Column('integer', { default: 0 })
+  stock: number;
 
   @CreateDateColumn({ name: 'fecha_creacion' })
   fechaCreacion: Date;
@@ -40,7 +43,6 @@ export class Producto {
   @JoinColumn({ name: 'id_proveedor', referencedColumnName: 'id' })
   proveedores: Proveedor;
 
-  @ManyToOne(() => Ventadetalle, ventaDetalle => ventaDetalle.productos)
-  @JoinColumn({ name: 'id_venta_detalle', referencedColumnName: 'id' })
-  ventaDetalle: Ventadetalle;
+  @OneToMany(() => DetalleVenta, (ventadetalle) => ventadetalle.producto)
+  ventadetalles: DetalleVenta[];
 }

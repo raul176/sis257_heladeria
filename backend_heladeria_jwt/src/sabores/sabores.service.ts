@@ -18,6 +18,7 @@ export class SaboresService {
 
     const sabor = new Sabor();
     sabor.nombre = createSaborDto.nombre.trim();
+    sabor.descripcion = createSaborDto.descripcion?.trim();
     return this.saboresRepository.save(sabor);
   }
 

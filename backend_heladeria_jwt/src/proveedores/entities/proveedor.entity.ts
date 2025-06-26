@@ -6,7 +6,7 @@ export class Proveedor {
   @PrimaryGeneratedColumn('identity')
   id: number;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 50, name: 'razon_social' })
   razonSocial: string;
 
   @Column({ type: 'varchar', length: 20 })
@@ -15,7 +15,7 @@ export class Proveedor {
   @Column({ type: 'varchar', length: 50 })
   telefono: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 100, name: 'tipo_producto' })
   tipoProducto: string;
 
   @CreateDateColumn({ name: 'fecha_creacion' })

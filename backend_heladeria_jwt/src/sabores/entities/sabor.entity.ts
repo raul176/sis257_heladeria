@@ -9,6 +9,9 @@ export class Sabor {
   @Column({ type: 'varchar', length: 100 })
   nombre: string;
 
+  @Column({ type: 'varchar', length: 255 })
+  descripcion: string;
+
   @CreateDateColumn({ name: 'fecha_creacion' })
   fechaCreacion: Date;
 

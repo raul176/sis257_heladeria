@@ -1,5 +1,5 @@
 import { Venta } from 'src/ventas/entities/venta.entity';
-import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 @Entity('usuarios')
 export class Usuario {
@@ -15,7 +15,6 @@ export class Usuario {
   @Column('varchar', { length: 100 })
   clave: string;  //"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImlhdCI6MTc0OTc1MzExOCwiZXhwIjoxNzQ5NzUzNTk4fQ.EjmA7NBJvS5esx79pI22aRcwIQsQ6ZxQzyzQgQ3jG7E"
 
-
   @CreateDateColumn({ name: 'fecha_creacion' })
   fechaCreacion: Date;
 
@@ -25,9 +24,8 @@ export class Usuario {
   @DeleteDateColumn({ name: 'fecha_eliminacion' })
   fechaEliminacion: Date;
 
-  @ManyToOne(() => Venta, venta => venta.usuario)
-  @JoinColumn({ name: 'id_venta', referencedColumnName: 'id' })
-  ventas: Venta;
+  @OneToMany(() => Venta, venta => venta.usuario)
+  ventas: Venta[];
 
   @BeforeInsert()
   @BeforeUpdate()

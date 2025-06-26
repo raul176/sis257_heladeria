@@ -6,17 +6,17 @@ export class Cliente {
   @PrimaryGeneratedColumn('identity')
   id: number;
 
-  @Column({ type: 'varchar', length: 50 })
-  nombre: string;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  nombre?: string;
 
-  @Column({ type: 'varchar', length: 50 })
-  apellido: string;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  apellido?: string;
 
-  @Column({ type: 'varchar', length: 30 })
-  telefono: string;
+  @Column({ type: 'varchar', length: 30, nullable: true })
+  telefono?: string;
 
-  @Column({ type: 'varchar', length: 100 })
-  direccion: string;
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  direccion?: string;
 
   @CreateDateColumn({ name: 'fecha_creacion' })
   fechaCreacion: Date;
@@ -27,7 +27,7 @@ export class Cliente {
   @DeleteDateColumn({ name: 'fecha_eliminacion' })
   fechaEliminacion: Date;
 
-  @ManyToOne(() => Venta, venta => venta.clientes)
+  @ManyToOne(() => Venta, venta => venta.cliente)
   @JoinColumn({ name: 'id_venta', referencedColumnName: 'id' })
   venta: Venta;
 }

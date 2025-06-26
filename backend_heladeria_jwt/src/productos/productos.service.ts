@@ -7,7 +7,7 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class ProductosService {
-  constructor(@InjectRepository(Producto) private productosRepository: Repository<Producto>) {}
+  constructor(@InjectRepository(Producto) private productosRepository: Repository<Producto>) { }
 
   async create(createProductoDto: CreateProductoDto): Promise<Producto> {
     const existe = await this.productosRepository.findOneBy({
@@ -24,6 +24,7 @@ export class ProductosService {
     producto.nombre = createProductoDto.nombre.trim();
     producto.presentacion = createProductoDto.presentacion.trim();
     producto.precio = createProductoDto.precio;
+    producto.stock = createProductoDto.stock;
     return this.productosRepository.save(producto);
   }
 
@@ -35,6 +36,7 @@ export class ProductosService {
         nombre: true,
         presentacion: true,
         precio: true,
+        stock: true,
         sabores: { id: true, nombre: true, productos: { nombre: true } },
         proveedores: { id: true, razonSocial: true },
       },
@@ -54,8 +56,26 @@ export class ProductosService {
 
   async update(id: number, updateProductoDto: UpdateProductoDto): Promise<Producto> {
     const producto = await this.findOne(id);
-    Object.assign(producto, updateProductoDto);
-    return this.productosRepository.save(producto);
+
+    // Actualiza los campos simples
+    producto.nombre = updateProductoDto.nombre?.trim() ?? producto.nombre;
+    producto.presentacion = updateProductoDto.presentacion?.trim() ?? producto.presentacion;
+    producto.precio = updateProductoDto.precio ?? producto.precio;
+    producto.stock = updateProductoDto.stock ?? producto.stock;
+
+    // Actualiza las relaciones por ID si vienen en el DTO
+    if (updateProductoDto.idSabor) {
+      producto.idSabor = updateProductoDto.idSabor;
+      producto.sabores = { id: updateProductoDto.idSabor } as any;
+    }
+    if (updateProductoDto.idProveedor) {
+      producto.idProveedor = updateProductoDto.idProveedor;
+      producto.proveedores = { id: updateProductoDto.idProveedor } as any;
+    }
+
+    await this.productosRepository.save(producto);
+
+    return this.findOne(id);
   }
 
   async remove(id: number) {

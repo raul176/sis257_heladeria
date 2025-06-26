@@ -19,7 +19,7 @@ export class EmpleadosService {
 
     const empleado = new Empleado();
     empleado.nombre = createEmpleadoDto.nombre.trim();
-    empleado.apellido = createEmpleadoDto.telefono.trim();
+    empleado.apellido = createEmpleadoDto.apellido.trim();
     empleado.telefono = createEmpleadoDto.telefono.trim();
     empleado.direccion = createEmpleadoDto.direccion.trim();
     empleado.cargo = createEmpleadoDto.cargo.trim();

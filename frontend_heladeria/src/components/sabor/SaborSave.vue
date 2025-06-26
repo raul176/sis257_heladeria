@@ -36,6 +36,7 @@ async function handleSave() {
   try {
     const body = {
       nombre: sabor.value.nombre,
+      descripcion: sabor.value.descripcion,
     }
     if (props.modoEdicion) {
       await http.patch(`${ENDPOINT}/${sabor.value.id}`, body)
@@ -53,29 +54,18 @@ async function handleSave() {
 
 <template>
   <div class="card flex justify-center">
-    <Dialog
-      v-model:visible="dialogVisible"
-      :header="props.modoEdicion ? 'Editar' : 'Crear'"
-      style="width: 25rem"
-    >
+    <Dialog v-model:visible="dialogVisible" :header="props.modoEdicion ? 'Editar' : 'Crear'" style="width: 25rem">
       <div class="flex items-center gap-4 mb-4">
         <label for="nombre" class="font-semibold w-3">Nombre</label>
-        <InputText
-          id="nombre"
-          v-model="sabor.nombre"
-          class="flex-auto"
-          autocomplete="off"
-          autofocus
-        />
+        <InputText id="nombre" v-model="sabor.nombre" class="flex-auto" autocomplete="off" autofocus />
+      </div>
+      <div class="flex items-center gap-4 mb-4">
+        <label for="descripcion" class="font-semibold w-3">Descripción</label>
+        <InputText id="descripcion" v-model="sabor.descripcion" class="flex-auto" autocomplete="off" />
       </div>
       <div class="flex justify-end gap-2">
-        <Button
-          type="button"
-          label="Cancelar"
-          icon="pi pi-times"
-          severity="secondary"
-          @click="dialogVisible = false"
-        ></Button>
+        <Button type="button" label="Cancelar" icon="pi pi-times" severity="secondary"
+          @click="dialogVisible = false"></Button>
         <Button type="button" label="Guardar" icon="pi pi-save" @click="handleSave"></Button>
       </div>
     </Dialog>

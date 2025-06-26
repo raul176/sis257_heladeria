@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,21 +7,14 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class ClientesService {
-  constructor(@InjectRepository(Cliente) private clientesRepository: Repository<Cliente>) {}
+  constructor(@InjectRepository(Cliente) private clientesRepository: Repository<Cliente>) { }
 
   async create(createClienteDto: CreateClienteDto): Promise<Cliente> {
-    const existe = await this.clientesRepository.findOneBy({
-      nombre: createClienteDto.nombre.trim(),
-      apellido: createClienteDto.apellido.trim(),
-    });
-
-    if (existe) throw new ConflictException('El cliente ya existe');
-
     const cliente = new Cliente();
-    cliente.nombre = createClienteDto.nombre.trim();
-    cliente.apellido = createClienteDto.apellido.trim();
-    cliente.telefono = createClienteDto.telefono.trim();
-    cliente.direccion = createClienteDto.direccion.trim();
+    cliente.nombre = createClienteDto.nombre?.trim();
+    cliente.apellido = createClienteDto.apellido?.trim();
+    cliente.telefono = createClienteDto.telefono?.trim();
+    cliente.direccion = createClienteDto.direccion?.trim();
     return this.clientesRepository.save(cliente);
   }
 

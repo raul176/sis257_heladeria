@@ -1,62 +1,52 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+
+import MainLayout from '@/views/MainLayout.vue'
+import HomeView from '../views/home/HomeView.vue'
 import { useAuthStore } from '@/stores';
 import { getTokenFromLocalStorage } from '@/helpers';
 
+const routes = [
+  {
+    path: '/',
+    component: MainLayout,
+    children: [
+      { path: '', name: 'home', component: HomeView },
+
+      { path: 'sabores', name: 'sabores', component: () => import('../views/SaborView.vue') },
+      { path: 'proveedores', name: 'proveedores', component: () => import('../views/ProveedorView.vue') },
+      { path: 'empleados', name: 'empleados', component: () => import('../views/EmpleadoView.vue') },
+      { path: 'productos', name: 'productos', component: () => import('../views/ProductoView.vue') },
+      { path: 'ventas', name: 'ventas', component: () => import('../views/VentaView.vue') },
+      {
+        path: 'registrar-venta',
+        name: 'registrar-venta',
+        component: () => import('@/views/RegistrarVentaView.vue'),
+        meta: { requiresAuth: true }
+      }
+    ]
+  },
+  { path: '/login', name: 'login', component: () => import('../views/LoginView.vue') }
+]
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: HomeView,
-    },
-    {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue'),
-    },
-    {
-      path: '/sabores',
-      name: 'sabores',
-      component: () => import('../views/SaborView.vue'),
-    },
-    {
-      path: '/empleados',
-      name: 'empleados',
-      component: () => import('../views/EmpleadoView.vue'),
-    },
-    {
-      path: '/ventas',
-      name: 'ventas',
-      component: () => import('../views/VentaView.vue'),
-    },
-    {
-      path: '/clientes',
-      name: 'clientes',
-      component: () => import('../views/ClienteView.vue'),
-    },
-    {
-      path: '/login', //aumentado
-      name: 'login',
-      component: () => import('../views/LoginView.vue')
-    },
-  ],
+  routes
 })
-//aumentado
-router.beforeEach(async to => {
-  const publicPages = ["/login"];
+
+// Implementación del guard de navegación global
+router.beforeEach((to, from, next) => {
+  const publicPages = ['/login', '/'];
   const authRequired = !publicPages.includes(to.path);
   const authStore = useAuthStore();
 
+  // Verificar si la ruta requiere autenticación
   if (authRequired && !getTokenFromLocalStorage()) {
-    if (authStore) authStore.logout();
-    authStore.returnUrl = to.fullPath;
-    return "/login";
+    if (authStore) authStore.logout(); // Limpiar el estado del store
+    authStore.returnUrl = to.path; // Guardar la URL para redirigir después del login
+    return next('/login'); // Redirigir al login
   }
+
+  next(); // Continuar con la navegación
 });
 
-export default router
+export default router;

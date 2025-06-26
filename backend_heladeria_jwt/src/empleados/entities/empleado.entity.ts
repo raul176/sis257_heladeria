@@ -35,7 +35,4 @@ export class Empleado {
 
   @DeleteDateColumn({ name: 'fecha_eliminacion' })
   fechaEliminacion: Date;
-
-  @CreateDateColumn({ name: 'fecha_contratación' })
-  fechaContratacion: Date;
 }
