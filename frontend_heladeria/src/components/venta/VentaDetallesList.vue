@@ -1,18 +1,19 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import http from '../../plugins/axios'
-import Dialog from 'primevue/dialog'
-import { useToast } from 'primevue/usetoast'
+import Dialog from 'primevue/dialog';
+import { useToast } from 'primevue/usetoast';
+import { ref, watch } from 'vue';
+import http from '../../plugins/axios';
 
 const props = defineProps<{
   visible: boolean
   ventaId: number | null
 }>()
 
-const emit = defineEmits(['close', 'update:visible'])
 
+const emit = defineEmits(['close', 'update:visible'])
 const toast = useToast()
 const detalles = ref<any[]>([])
+const cliente = ref<{nombre: string; nit: string} | null>(null)
 const loading = ref<boolean>(false)
 const totalVenta = ref<number>(0)
 
@@ -22,7 +23,8 @@ async function cargarDetalles() {
   loading.value = true
   try {
     const response = await http.get(`ventas/${props.ventaId}/detalles`)
-    detalles.value = response.data
+    detalles.value = response.data.detalles
+    cliente.value = response.data.cliente
 
     // Calcular el total de la venta sumando todos los subtotales
     totalVenta.value = detalles.value.reduce((total, detalle) =>
@@ -81,6 +83,8 @@ defineExpose({ cargarDetalles })
           <thead>
             <tr>
               <th class="th-number">No.</th>
+               <th>Cliente</th>
+              <th>NIT-Cliente</th>
               <th>Producto</th>
               <th>Cantidad</th>
               <th>Precio Unitario</th>
@@ -90,6 +94,8 @@ defineExpose({ cargarDetalles })
           <tbody>
             <tr v-for="(detalle, index) in detalles" :key="detalle.id">
               <td class="td-number">{{ index + 1 }}</td>
+              <td>{{ detalle.cliente?.nombre || '-' }}</td>
+              <td>{{ detalle.cliente?.nit || '-' }}</td>
               <td>{{ detalle.producto?.nombre || '-' }}</td>
               <td class="td-number">{{ detalle.cantidad }}</td>
               <td class="td-number">{{ detalle.precioUnitario }} Bs</td>

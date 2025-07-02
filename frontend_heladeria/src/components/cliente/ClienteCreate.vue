@@ -7,6 +7,10 @@
         <label for="nombre" class="form-label">Nombre Completo</label>
         <InputText id="nombre" v-model="cliente.nombre" class="form-input" autocomplete="off" autofocus required />
       </div>
+      <div class="field">
+        <label for="nit" class="form-label">NIT</label>
+        <InputText id="nit" v-model="cliente.nit" class="form-input" autocomplete="off" autofocus required />
+      </div>
     </div>
     <template #footer>
       <Button label="Cancelar" icon="pi pi-times" class="p-button-text btn-cancel" :disabled="loading"
@@ -18,12 +22,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, reactive } from 'vue'
+import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
-import Button from 'primevue/button'
+import { useToast } from 'primevue/usetoast'
+import { reactive, ref, watch } from 'vue'
 import http from '../../plugins/axios'
-import { useToast } from 'primevue/usetoast';
 
 const toast = useToast()
 const ENDPOINT = '/clientes'
@@ -33,7 +37,7 @@ const props = defineProps<{
   clienteData?: Partial<{
     id: number
     nombre: string
-    apellido: string
+    nit: string
     direccion: string
     telefono: string
   }>
@@ -53,7 +57,7 @@ watch(visible, v => emit('update:visible', v))
 
 const cliente = reactive({
   nombre: null,
-  apellido: null,
+  nit: null,
   direccion: null,
   telefono: null
 })
@@ -64,7 +68,7 @@ watch(
     if (data) {
       Object.assign(cliente, data)
     } else {
-      Object.assign(cliente, { nombre: null, apellido: null, direccion: null, telefono: null })
+      Object.assign(cliente, { nombre: null, nit: null, direccion: null, telefono: null })
     }
   },
   { immediate: true }
@@ -78,13 +82,13 @@ async function handleSave() {
   try {
     const body = {
       nombre: cliente.nombre,
-      apellido: cliente.apellido,
+      nit: cliente.nit,
       direccion: cliente.direccion,
       telefono: cliente.telefono
     }
     await http.post(ENDPOINT, body)
     emit('save', { ...cliente })
-    Object.assign(cliente, { nombre: '', apellido: '', direccion: '', telefono: '' })
+    Object.assign(cliente, { nombre: '', nit: '', direccion: '', telefono: '' })
     visible.value = false
   } catch (error: any) {
     console.error('Error al guardar el cliente:', error)

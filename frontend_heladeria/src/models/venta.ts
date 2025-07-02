@@ -3,15 +3,14 @@ import type { Usuario } from './usuario'
 
 // Definir el tipo para los detalles de venta
 export interface DetalleVenta {
-  producto: {
+  cliente: {
     id: number
     nombre: string
-    precio: number
+    nit: string
     [key: string]: any
   }
-  cantidad: number
-  precioUnitario: number
 }
+
 
 export interface Venta {
   id: number

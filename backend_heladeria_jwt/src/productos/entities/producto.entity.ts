@@ -1,6 +1,16 @@
 import { Sabor } from 'src/sabores/entities/sabor.entity';
 import { Proveedor } from 'src/proveedores/entities/proveedor.entity';
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { DetalleVenta } from 'src/ventas/entities/detalle_venta.entity';
 
 @Entity('productos')
@@ -43,6 +53,6 @@ export class Producto {
   @JoinColumn({ name: 'id_proveedor', referencedColumnName: 'id' })
   proveedores: Proveedor;
 
-  @OneToMany(() => DetalleVenta, (ventadetalle) => ventadetalle.producto)
+  @OneToMany(() => DetalleVenta, ventadetalle => ventadetalle.producto)
   ventadetalles: DetalleVenta[];
 }

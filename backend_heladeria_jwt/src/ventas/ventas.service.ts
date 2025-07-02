@@ -1,17 +1,17 @@
 import {
-  Injectable,
-  NotFoundException,
   BadRequestException,
+  Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, In } from 'typeorm';
-import { Venta } from './entities/venta.entity';
-import { DetalleVenta } from './entities/detalle_venta.entity';
-import { CreateVentaDto } from './dto/create-venta.dto';
-import { Producto } from '../productos/entities/producto.entity';
-import { Cliente } from '../clientes/entities/cliente.entity';
 import { Usuario } from 'src/usuarios/entities/usuario.entity';
+import { DataSource, Repository } from 'typeorm';
+import { Cliente } from '../clientes/entities/cliente.entity';
+import { Producto } from '../productos/entities/producto.entity';
+import { CreateVentaDto } from './dto/create-venta.dto';
+import { DetalleVenta } from './entities/detalle_venta.entity';
+import { Venta } from './entities/venta.entity';
 
 @Injectable()
 export class VentasService {
@@ -27,17 +27,12 @@ export class VentasService {
     @InjectRepository(Usuario)
     private usuarioRepository: Repository<Usuario>,
     private dataSource: DataSource,
-  ) { }
+  ) {}
 
   async obtenerVentas(): Promise<Venta[]> {
     console.log('Obteniendo todas las ventas...');
     const ventas = await this.ventaRepository.find({
-      relations: [
-        'cliente',
-        'usuario',
-        'ventadetalles',
-        'ventadetalles.producto',
-      ],
+      relations: ['cliente', 'usuario', 'ventadetalles', 'ventadetalles.producto'],
     });
     console.log('Ventas obtenidas:', ventas);
     return ventas;
@@ -47,12 +42,7 @@ export class VentasService {
     console.log(`Buscando venta por ID: ${id}`);
     const venta = await this.ventaRepository.findOne({
       where: { id },
-      relations: [
-        'cliente',
-        'usuario',
-        'ventadetalles',
-        'ventadetalles.producto',
-      ],
+      relations: ['cliente', 'usuario', 'ventadetalles', 'ventadetalles.producto'],
     });
 
     if (!venta) {
@@ -64,10 +54,10 @@ export class VentasService {
     return venta;
   }
 
-  async obtenerVentaDetalles(id: number): Promise<DetalleVenta[]> {
+  async obtenerVentaDetalles(id: number): Promise<{ cliente: Cliente; detalles: DetalleVenta[] }> {
     const venta = await this.ventaRepository.findOne({
       where: { id },
-      relations: ['ventadetalles', 'ventadetalles.producto'],
+      relations: ['cliente', 'ventadetalles', 'ventadetalles.producto'],
     });
 
     if (!venta) {
@@ -75,12 +65,13 @@ export class VentasService {
     }
 
     if (!venta.ventadetalles || venta.ventadetalles.length === 0) {
-      throw new NotFoundException(
-        `No se encontraron detalles para la venta con ID ${id}`,
-      );
+      throw new NotFoundException(`No se encontraron detalles para la venta con ID ${id}`);
     }
 
-    return venta.ventadetalles;
+    return {
+      cliente: venta.cliente,
+      detalles: venta.ventadetalles,
+    };
   }
 
   async crearVenta(createVentaDto: CreateVentaDto): Promise<Venta> {
@@ -97,12 +88,8 @@ export class VentasService {
           where: { id: createVentaDto.idCliente },
         });
         if (!cliente) {
-          console.log(
-            `Cliente con ID ${createVentaDto.idCliente} no encontrado`,
-          );
-          throw new NotFoundException(
-            `Cliente con ID ${createVentaDto.idCliente} no encontrado`,
-          );
+          console.log(`Cliente con ID ${createVentaDto.idCliente} no encontrado`);
+          throw new NotFoundException(`Cliente con ID ${createVentaDto.idCliente} no encontrado`);
         }
         console.log('Cliente encontrado:', cliente);
       }
@@ -112,12 +99,8 @@ export class VentasService {
         where: { id: createVentaDto.idUsuario },
       });
       if (!usuario) {
-        console.log(
-          `Usuario con ID ${createVentaDto.idUsuario} no encontrado`,
-        );
-        throw new NotFoundException(
-          `Usuario con ID ${createVentaDto.idUsuario} no encontrado`,
-        );
+        console.log(`Usuario con ID ${createVentaDto.idUsuario} no encontrado`);
+        throw new NotFoundException(`Usuario con ID ${createVentaDto.idUsuario} no encontrado`);
       }
       console.log('Usuario encontrado:', usuario);
 
@@ -135,7 +118,7 @@ export class VentasService {
         totalVenta: 0,
         estado: 'realizada',
         montoPagado: 0, // Se actualizará después de calcular el total
-        cambio: 0,      // Se actualizará después de calcular el total
+        cambio: 0, // Se actualizará después de calcular el total
       });
 
       if (cliente) {
@@ -151,9 +134,7 @@ export class VentasService {
 
       if (!createVentaDto.detalles || !createVentaDto.detalles.length) {
         console.log('No se proporcionaron detalles de venta');
-        throw new BadRequestException(
-          'La venta debe contener al menos un detalle',
-        );
+        throw new BadRequestException('La venta debe contener al menos un detalle');
       }
 
       for (const detalle of createVentaDto.detalles) {
@@ -164,18 +145,13 @@ export class VentasService {
 
         if (!producto) {
           console.log(`Producto con ID ${detalle.idProducto} no encontrado`);
-          throw new NotFoundException(
-            `Producto con ID ${detalle.idProducto} no encontrado`,
-          );
+          throw new NotFoundException(`Producto con ID ${detalle.idProducto} no encontrado`);
         }
         console.log('Producto encontrado:', producto);
 
         const cantidadNum = Number(detalle.cantidad);
         if (isNaN(cantidadNum) || cantidadNum <= 0) {
-          console.log(
-            `Cantidad inválida para el producto ${producto.nombre}:`,
-            detalle.cantidad,
-          );
+          console.log(`Cantidad inválida para el producto ${producto.nombre}:`, detalle.cantidad);
           throw new BadRequestException(
             `La cantidad para el producto ${producto.nombre} debe ser un número positivo`,
           );
@@ -194,7 +170,7 @@ export class VentasService {
         const subtotal = precio * cantidadNum;
 
         console.log(
-          `Creando detalle de venta para producto ${producto.nombre}: cantidad=${cantidadNum}, precio=${precio}, subtotal=${subtotal}`,
+          `Creando detalle de venta para producto ${cliente?.nombre}, ${cliente?.nit}, ${producto.nombre}: cantidad=${cantidadNum}, precio=${precio}, subtotal=${subtotal}`,
         );
         const nuevoDetalle = this.detalleVentaRepository.create({
           cantidad: cantidadNum,
@@ -214,9 +190,7 @@ export class VentasService {
         );
 
         totalVenta += subtotal;
-        console.log(
-          `Subtotal sumado al totalVenta. Total actual: ${totalVenta}`,
-        );
+        console.log(`Subtotal sumado al totalVenta. Total actual: ${totalVenta}`);
       }
 
       // Calcular cambio
@@ -246,15 +220,10 @@ export class VentasService {
       console.log('Ocurrió un error durante la creación de la venta:', error);
       await queryRunner.rollbackTransaction();
 
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
-      throw new InternalServerErrorException(
-        'Error al procesar la venta: ' + error.message,
-      );
+      throw new InternalServerErrorException('Error al procesar la venta: ' + error.message);
     } finally {
       await queryRunner.release();
       console.log('QueryRunner liberado.');
@@ -300,14 +269,10 @@ export class VentasService {
               `Stock restaurado para producto ${producto.nombre}: nuevo stock=${producto.stock}`,
             );
           } else {
-            console.log(
-              `Cantidad inválida en detalle de venta para producto ID ${producto.id}`,
-            );
+            console.log(`Cantidad inválida en detalle de venta para producto ID ${producto.id}`);
           }
         } else {
-          console.log(
-            `Producto con ID ${detalle.producto.id} no encontrado al restaurar stock`,
-          );
+          console.log(`Producto con ID ${detalle.producto.id} no encontrado al restaurar stock`);
         }
 
         // Actualizar fechaAnulacion en el detalle
@@ -319,7 +284,9 @@ export class VentasService {
       venta.totalVenta = 0;
       venta.fechaAnulacion = fechaAnulacion;
       await queryRunner.manager.save(venta);
-      console.log('Venta marcada como anulada, totalVenta puesto en 0 y fechaAnulacion actualizada');
+      console.log(
+        'Venta marcada como anulada, totalVenta puesto en 0 y fechaAnulacion actualizada',
+      );
 
       await queryRunner.commitTransaction();
       console.log('Transacción de anulación confirmada.');
@@ -329,15 +296,10 @@ export class VentasService {
       console.log('Ocurrió un error durante la anulación de la venta:', error);
       await queryRunner.rollbackTransaction();
 
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
-      throw new InternalServerErrorException(
-        'Error al anular la venta: ' + error.message,
-      );
+      throw new InternalServerErrorException('Error al anular la venta: ' + error.message);
     } finally {
       await queryRunner.release();
       console.log('QueryRunner liberado tras anulación.');
@@ -387,9 +349,7 @@ export class VentasService {
       };
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException(
-        'Error al limpiar ventas anuladas: ' + error.message,
-      );
+      throw new InternalServerErrorException('Error al limpiar ventas anuladas: ' + error.message);
     } finally {
       await queryRunner.release();
     }

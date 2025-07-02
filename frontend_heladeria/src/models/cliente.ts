@@ -1,7 +1,7 @@
 export interface Cliente {
   id: number
   nombre: string
-  apellido: string
+  nit: string
   telefono: string
   direccion: string
 }

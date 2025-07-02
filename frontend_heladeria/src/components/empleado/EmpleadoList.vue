@@ -85,7 +85,6 @@ defineExpose({ obtenerLista })
             <th>Teléfono</th>
             <th>Dirección</th>
             <th>Cargo</th>
-            <th>Fotografía</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -97,15 +96,6 @@ defineExpose({ obtenerLista })
             <td>{{ empleado.telefono }}</td>
             <td>{{ empleado.direccion }}</td>
             <td>{{ empleado.cargo }}</td>
-            <td>
-              <img
-              v-if="empleado.fotografia"
-              :src="empleado.fotografia"
-              alt="fotografia"
-              height="80px"
-              />
-              <span v-else>Sin fotografía</span>
-            </td>
             <td>
               <Button icon="pi pi-pencil" aria-label="Editar" text @click="emitirEdicion(empleado)" />
               <Button

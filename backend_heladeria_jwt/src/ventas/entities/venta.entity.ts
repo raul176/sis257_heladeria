@@ -54,15 +54,15 @@ export class Venta {
   cambio: number;
 
   //  muchas ventas puede realizar  un cliente
-  @ManyToOne(() => Cliente, (cliente) => cliente.venta)
+  @ManyToOne(() => Cliente, cliente => cliente.venta)
   @JoinColumn({ name: 'id_cliente', referencedColumnName: 'id' })
   cliente: Cliente;
 
-  @ManyToOne(() =>  Usuario, (usuario) => usuario.ventas)
+  @ManyToOne(() => Usuario, usuario => usuario.ventas)
   @JoinColumn({ name: 'id_usuario', referencedColumnName: 'id' })
-  usuario:   Usuario;
+  usuario: Usuario;
 
-  @OneToMany(() => DetalleVenta, (detalleVenta) => detalleVenta.venta, {
+  @OneToMany(() => DetalleVenta, detalleVenta => detalleVenta.venta, {
     cascade: true,
   })
   ventadetalles: DetalleVenta[];

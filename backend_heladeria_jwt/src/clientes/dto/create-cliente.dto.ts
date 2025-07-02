@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, Matches, MaxLength, IsOptional } from 'class-validator';
+import { IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 
 export class CreateClienteDto {
   @ApiProperty({
@@ -13,9 +13,9 @@ export class CreateClienteDto {
     example: 'Pérez',
   })
   @IsOptional()
-  @IsString({ message: 'El campo apellido debe ser de tipo cadena' })
-  @MaxLength(50, { message: 'El campo apellido no debe ser mayor a 50 caracteres' })
-  apellido?: string;
+  @IsString({ message: 'El campo nit debe ser de tipo cadena' })
+  @MaxLength(50, { message: 'El campo nit no debe ser mayor a 50 caracteres' })
+  nit?: string;
 
   @ApiProperty({
     example: '+591 71234567',

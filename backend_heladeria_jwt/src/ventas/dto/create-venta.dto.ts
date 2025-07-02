@@ -1,4 +1,14 @@
-import { IsNotEmpty, IsNumber, IsString, IsArray, ValidateNested, IsOptional, Min, Max, IsEnum } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsArray,
+  ValidateNested,
+  IsOptional,
+  Min,
+  Max,
+  IsEnum,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -9,7 +19,10 @@ class DetalleVentaDto {
   idProducto: number;
 
   @ApiProperty({ description: 'Cantidad del producto', example: 2 })
-  @IsNumber({ allowInfinity: false, allowNaN: false }, { message: 'La cantidad debe ser un número entero válido' })
+  @IsNumber(
+    { allowInfinity: false, allowNaN: false },
+    { message: 'La cantidad debe ser un número entero válido' },
+  )
   @Min(1, { message: 'La cantidad debe ser al menos 1' })
   @Max(1000000, { message: 'Cantidad demasiado grande' })
   cantidad: number;
@@ -33,8 +46,9 @@ export class CreateVentaDto {
     default: 'efectivo',
   })
   @IsString({ message: 'El método de pago debe ser una cadena de texto' })
-  @IsEnum(['efectivo', 'tarjeta', 'transferencia', 'cotización', 'otro'], { 
-    message: 'Método de pago inválido. Debe ser: efectivo, tarjeta, transferencia, cotización o otro' 
+  @IsEnum(['efectivo', 'tarjeta', 'transferencia', 'cotización', 'otro'], {
+    message:
+      'Método de pago inválido. Debe ser: efectivo, tarjeta, transferencia, cotización o otro',
   })
   metodoPago: string;
 
@@ -49,7 +63,7 @@ export class CreateVentaDto {
 
   @ApiProperty({
     description: 'Monto pagado por el cliente',
-    example: 100.00,
+    example: 100.0,
     type: Number,
     default: 0,
   })
@@ -59,7 +73,7 @@ export class CreateVentaDto {
 
   @ApiProperty({
     description: 'Cambio entregado al cliente',
-    example: 5.00,
+    example: 5.0,
     type: Number,
     default: 0,
   })

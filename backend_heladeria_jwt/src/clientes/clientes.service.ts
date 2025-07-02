@@ -1,18 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Cliente } from './entities/cliente.entity';
-import { Repository } from 'typeorm';
 
 @Injectable()
 export class ClientesService {
-  constructor(@InjectRepository(Cliente) private clientesRepository: Repository<Cliente>) { }
+  constructor(@InjectRepository(Cliente) private clientesRepository: Repository<Cliente>) {}
 
   async create(createClienteDto: CreateClienteDto): Promise<Cliente> {
     const cliente = new Cliente();
     cliente.nombre = createClienteDto.nombre?.trim();
-    cliente.apellido = createClienteDto.apellido?.trim();
+    cliente.nit = createClienteDto.nit?.trim();
     cliente.telefono = createClienteDto.telefono?.trim();
     cliente.direccion = createClienteDto.direccion?.trim();
     return this.clientesRepository.save(cliente);

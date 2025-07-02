@@ -45,4 +45,3 @@ export class ProveedoresService {
     if (proveedor) return this.proveedoresRepository.softRemove(proveedor);
   }
 }
-

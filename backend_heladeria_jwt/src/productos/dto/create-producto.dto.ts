@@ -46,7 +46,10 @@ export class CreateProductoDto {
     description: 'Precio del producto (máximo 2 decimales)',
   })
   @IsNotEmpty({ message: 'El campo precio no debe ser vacío' })
-  @IsNumber({ maxDecimalPlaces: 2 }, { message: 'El campo precio debe ser de tipo numérico y tener como máximo 2 decimales' })
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    { message: 'El campo precio debe ser de tipo numérico y tener como máximo 2 decimales' },
+  )
   @Min(0, { message: 'El campo precio debe ser mayor o igual a 0' })
   precio: number;
 

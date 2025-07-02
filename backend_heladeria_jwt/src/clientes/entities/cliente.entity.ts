@@ -1,5 +1,16 @@
+import { DetalleVenta } from 'src/ventas/entities/detalle_venta.entity';
 import { Venta } from 'src/ventas/entities/venta.entity';
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('clientes')
 export class Cliente {
@@ -10,7 +21,7 @@ export class Cliente {
   nombre?: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  apellido?: string;
+  nit?: string;
 
   @Column({ type: 'varchar', length: 30, nullable: true })
   telefono?: string;
@@ -30,4 +41,7 @@ export class Cliente {
   @ManyToOne(() => Venta, venta => venta.cliente)
   @JoinColumn({ name: 'id_venta', referencedColumnName: 'id' })
   venta: Venta;
+
+  @OneToMany(() => DetalleVenta, ventadetalle => ventadetalle.cliente)
+  ventadetalles: DetalleVenta[];
 }
