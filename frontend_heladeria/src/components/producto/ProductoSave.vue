@@ -1,14 +1,15 @@
 <script setup lang="ts">
+import { presentacionsOptions } from '@/enum/presentacion'
 import type { Producto } from '@/models/producto'
 import type { Proveedor } from '@/models/proveedor'
 import type { Sabor } from '@/models/sabor'
 import http from '@/plugins/axios'
+import { InputNumber } from 'primevue'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
-import InputText from 'primevue/inputtext'
 import Dropdown from 'primevue/dropdown'
-import { computed, ref, watch, onMounted } from 'vue'
-import { InputNumber } from 'primevue'
+import InputText from 'primevue/inputtext'
+import { computed, onMounted, ref, watch } from 'vue'
 
 const ENDPOINT = 'productos'
 const props = defineProps({
@@ -90,7 +91,8 @@ async function handleSave() {
       </div>
       <div class="flex items-center gap-4 mb-4">
         <label for="presentacion" class="font-semibold w-3">Presentación</label>
-        <InputText id="presentacion" v-model="producto.presentacion" class="flex-auto" autocomplete="off" />
+        <Dropdown id="presentacion" v-model="producto.presentacion" :options="presentacionsOptions"
+          optionLabel="label" optionValue="value" placeholder="Seleccione una presentación" class="flex-auto" />
       </div>
       <div class="flex items-center gap-4 mb-4">
         <label for="precio" class="font-semibold w-3">Precio (Bs)</label>
