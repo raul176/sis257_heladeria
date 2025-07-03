@@ -16,6 +16,9 @@ export class DetalleVenta {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ name: 'id_venta', type: 'int' })
+  idCliente: number;
+
   @Column({ type: 'numeric', precision: 10, scale: 2 })
   cantidad: number;
 

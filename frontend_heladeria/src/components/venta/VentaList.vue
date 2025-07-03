@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref, computed, watch } from 'vue'
-import http from '../../plugins/axios'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
-import Tag from 'primevue/tag'
 import { useToast } from 'primevue/usetoast'
+import { computed, onMounted, ref, watch } from 'vue'
 import type { Venta } from '../../models/venta'
+import http from '../../plugins/axios'
 import VentaDetallesList from './VentaDetallesList.vue'
 
 const toast = useToast()
@@ -127,7 +126,7 @@ defineExpose({ obtenerLista })
             <td>
               {{
                 (venta.cliente
-                  ? (venta.cliente.nombre + ' ' + (venta.cliente.apellido ?? ''))
+                  ? (venta.cliente.nombre + ' ' + (venta.cliente.nit ?? ''))
                   : '-')
               }}
             </td>

@@ -75,7 +75,7 @@
                         <div class="col-md-4">
                             <div class="cream_box">
                                 <div class="cream_img"><img src="@/assets/images/productos/cono/cono-naranja.png"></div>
-                                <div class="price_text">Bs.12</div>
+                                <div class="price_text">Bs.10</div>
                                 <h6 class="strawberry_text">Naranja - Cono</h6>
                                 <!-- <div class="cart_bt"><a href="#">Agregar al carrito</a></div> -->
                             </div>
@@ -83,7 +83,7 @@
                         <div class="col-md-4">
                             <div class="cream_box">
                                 <div class="cream_img"><img src="@/assets/images/productos/copa/copa-naranja.png"></div>
-                                <div class="price_text">Bs.20</div>
+                                <div class="price_text">Bs.18</div>
                                 <h6 class="strawberry_text">Naranja - Copa</h6>
                                 <!-- <div class="cart_bt"><a href="#">Agregar al carrito</a></div> -->
                             </div>
@@ -92,7 +92,7 @@
                             <div class="cream_box">
                                 <div class="cream_img"><img src="@/assets/images/productos/envase/envase-naranja.png">
                                 </div>
-                                <div class="price_text">Bs.28</div>
+                                <div class="price_text">Bs.25</div>
                                 <h6 class="strawberry_text">Naranja - Envase</h6>
                                 <div class="cart_bt"><a href="#">Agregar al carrito</a></div>
                             </div>
@@ -106,7 +106,7 @@
                         <div class="col-md-4">
                             <div class="cream_box">
                                 <div class="cream_img"><img src="@/assets/images/productos/cono/cono-banana.png"></div>
-                                <div class="price_text">Bs.11</div>
+                                <div class="price_text">Bs.10</div>
                                 <h6 class="strawberry_text">Banana - Cono</h6>
                                 <!-- <div class="cart_bt"><a href="#">Agregar al carrito</a></div> -->
                             </div>
@@ -114,7 +114,7 @@
                         <div class="col-md-4">
                             <div class="cream_box">
                                 <div class="cream_img"><img src="@/assets/images/productos/copa/copa-banana.png"></div>
-                                <div class="price_text">Bs.19</div>
+                                <div class="price_text">Bs.18</div>
                                 <h6 class="strawberry_text">Banana - Copa</h6>
                                 <!-- <div class="cart_bt"><a href="#">Agregar al carrito</a></div> -->
                             </div>
@@ -123,7 +123,7 @@
                             <div class="cream_box">
                                 <div class="cream_img"><img src="@/assets/images/productos/envase/envase-banana.png">
                                 </div>
-                                <div class="price_text">Bs.26</div>
+                                <div class="price_text">Bs.25</div>
                                 <h6 class="strawberry_text">Banana - Envase</h6>
                                 <!-- <div class="cart_bt"><a href="#">Agregar al carrito</a></div> -->
                             </div>
@@ -137,7 +137,7 @@
                         <div class="col-md-4">
                             <div class="cream_box">
                                 <div class="cream_img"><img src="@/assets/images/productos/cono/cono-limon.png"></div>
-                                <div class="price_text">Bs.13</div>
+                                <div class="price_text">Bs.10</div>
                                 <h6 class="strawberry_text">Limón - Cono</h6>
                                 <!-- <div class="cart_bt"><a href="#">Agregar al carrito</a></div> -->
                             </div>
@@ -145,7 +145,7 @@
                         <div class="col-md-4">
                             <div class="cream_box">
                                 <div class="cream_img"><img src="@/assets/images/productos/copa/copa-limon.png"></div>
-                                <div class="price_text">Bs.22</div>
+                                <div class="price_text">Bs.18</div>
                                 <h6 class="strawberry_text">Limón - Copa</h6>
                                 <!-- <div class="cart_bt"><a href="#">Agregar al carrito</a></div> -->
                             </div>
@@ -154,7 +154,7 @@
                             <div class="cream_box">
                                 <div class="cream_img"><img src="@/assets/images/productos/envase/envase-limon.png">
                                 </div>
-                                <div class="price_text">Bs.30</div>
+                                <div class="price_text">Bs.25</div>
                                 <h6 class="strawberry_text">Limón - Envase</h6>
                                 <!-- <div class="cart_bt"><a href="#">Agregar al carrito</a></div> -->
                             </div>
